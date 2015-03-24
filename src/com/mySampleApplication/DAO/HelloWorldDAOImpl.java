@@ -1,8 +1,6 @@
 package com.mySampleApplication.DAO;
 
 import com.mySampleApplication.utils.HibernateUtil;
-import com.mySampleApplication.DAO.HelloWorldDAO;
-import com.mySampleApplication.DAO.HellotableEntity;
 import org.hibernate.Session;
 
 /**

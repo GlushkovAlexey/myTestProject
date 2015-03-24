@@ -1,55 +1,126 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="GlushkovAlexeyGHS" basedir="." default="clean">
+<project name="GlushkovAlexeyGHS" basedir="." default="main">
 
-    <property name="src" location="src"/>
-    <property name="buildSrc" location="myApplication"/>
-    <property name="dist"  location="dist"/>
-    <property name="jdk.version" value="1.7" />
+    <property name="src.dir"     value="src"/>
+
+    <property name="build.dir"   value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir"     value="${build.dir}/jar"/>
     <property name="lib.dir"     value="lib"/>
-    <property name="web.content"     value="web"/>
-    <property name="main-class"  value="Main"/>
-    <property name="classes.dir" value="classes"/>
+    <property name="wwwdir"     value="war"/>
+    <property name="deploy.path"   value="C:\Apache Software Foundation\Tomcat 7.0\webapps"/>
+    <property name="appserver.lib"   value="{env.CATALINA_HOME}"/>
+
+
+    <property name="tomcat.libs.dir" location="D:/workspace/_LIBS" />
+
+    <path id="catalina-ant-classpath">
+        <fileset dir="${lib.dir}">
+            <include name="catalina-ant.jar"/>
+            <include name="tomcat-coyote.jar"/>
+            <include name="tomcat-util.jar"/>
+            <include name="tomcat-juli.jar"/>
+        </fileset>
+    </path>
+
 
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
     </path>
 
+
     <target name="clean">
-        <delete dir="build"/>
-        <delete dir="out"/>
-        <delete dir="${dist}"/>
-        <delete file="myApplication_Src.zip"/>
+        <delete dir="${build.dir}"/>
     </target>
 
-    <target name="init" depends="clean">
-        <mkdir dir="${buildSrc}"/>
-        <mkdir dir="${dist}"/>
-
-    </target>
-
-    <target name="compile"  depends="init" description="Compiles the Task">
+    <target name="compile">
         <mkdir dir="${classes.dir}"/>
-        <javac srcdir="${src}" destdir="${classes.dir}" classpathref="classpath"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
+		<!--<mkdir dir="${classes.dir}/lib"/>-->
+		<!--<copy flatten="false" todir="${classes.dir}/lib" includeemptydirs="false">-->
+			<!--<fileset dir="lib">-->
+				<!--<include name="**/*.jar" />-->
+			<!--</fileset>-->
+		<!--</copy>-->
+		<copy todir="${classes.dir}" >
+            <fileset dir="${src.dir}">
+                <include name="**/*.xml" />
+            </fileset>
+        </copy>   		
     </target>
 
-    <target name="jar" description="JARs the Task" depends="compile">
-        <jar destfile="${ant.project.name}.jar" basedir="${classes.dir}">
-        <manifest>
-            <attribute name="Main-Class" value="Main"/>
-            <attribute name = "Class-Path" value="**/*.jar"/>
-        </manifest>
-            <fileset dir="${lib.dir}" includes="**/*.jar"/>
-        </jar>
-    </target>
+    <target name="war" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <war destfile="${jar.dir}/${ant.project.name}.war" webxml="${wwwdir}/WEB-INF/web.xml">
+            <fileset dir="${wwwdir}"/>
+            <classes dir="${classes.dir}"/>
+            <lib dir="${lib.dir}" />
+        </war>
 
-    <target name="run" description="Run program"><!--depends="dist" > -->
-        <java jar="${ant.project.name}.jar" fork="true" classpathref="classpath"/>
-    </target>
+        <copy todir="C:\Apache Software Foundation\Tomcat 7.0\webapps" overwrite="true">
+            <fileset dir="${jar.dir}">
+                <include name="*.war"/>
+            </fileset>
+        </copy>
 
-    <target name="copy" depends="compile">
-        <copy todir="${buildSrc}/lib">
-            <fileset dir="${lib.dir}"/>
+        <copy todir="${deploy.path}" preservelastmodified="true">
+            <fileset dir=".">
+                <include name="*.war"/>
+            </fileset>
         </copy>
     </target>
+
+    <taskdef name="catalina-deploy" classname="org.apache.catalina.ant.DeployTask" classpathref="catalina-ant-classpath"/>
+    <taskdef name="catalina-list" classname="org.apache.catalina.ant.ListTask" classpathref="catalina-ant-classpath"/>
+    <taskdef name="catalina-reload" classname="org.apache.catalina.ant.ReloadTask" classpathref="catalina-ant-classpath"/>
+    <taskdef name="catalina-findleaks" classname="org.apache.catalina.ant.FindLeaksTask" classpathref="catalina-ant-classpath"/>
+    <taskdef name="catalina-resources" classname="org.apache.catalina.ant.ResourcesTask" classpathref="catalina-ant-classpath"/>
+    <taskdef name="catalina-start" classname="org.apache.catalina.ant.StartTask" classpathref="catalina-ant-classpath"/>
+    <taskdef name="catalina-stop" classname="org.apache.catalina.ant.StopTask" classpathref="catalina-ant-classpath"/>
+    <taskdef name="catalina-undeploy" classname="org.apache.catalina.ant.UndeployTask" classpathref="catalina-ant-classpath"/>
+
+    <property name="tomcat.manager.url"   value="http://localhost:8080/manager/html"/>
+    <property name="tomcat.username"   value="admin"/>
+    <property name="tomcat.password"   value="admin"/>
+
+    <target name = "stop-webapp">
+        <catalina-stop url="${tomcat.manager.url}"
+                       username="${tomcat.username}"
+                       password="${tomcat.password}"
+                       path="/GlushkovAlexeyGHS"
+                       failonerror="false"/>
+    </target>
+
+    <target name = "start-webapp">
+        <catalina-start url="${tomcat.manager.url}"
+                        username="${tomcat.username}"
+                        password="${tomcat.password}"
+                        path="/${ant.project.name}"/>
+    </target>
+
+    <target name = "undeploy-webapp">
+        <catalina-undeploy url="${tomcat.manager.url}"
+                           username="${tomcat.username}"
+                           password="${tomcat.password}"
+                           path="/${ant.project.name}"
+                           failonerror="false"/>
+    </target>
+
+    <target name = "deploy">
+        <catalina-deploy url="${tomcat.manager.url}"
+                         username="${tomcat.username}"
+                         password="${tomcat.password}"
+                         path="/${ant.project.name}"
+                         war="file:${jar.dir}/${ant.project.name}.war"/>
+    </target>
+
+    <target name="clean-build" depends="clean,war"/>
+
+    <target name="main" depends="clean,war"/>
+
+
+    <property environment="env"/>
+    <echo message="JAVA_HOME is set to = ${env.JAVA_HOME}" />
+    <echo message="JAVA_HOME is set to = ${env.CATALINA_HOME}" />
+
 
 </project>

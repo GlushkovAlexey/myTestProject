@@ -10,6 +10,6 @@
 
 
     <!-- Specify the app servlets.                   -->
-    <servlet path='/MySampleApplicationService' class='com.mySampleApplication.server.MySampleApplicationServiceImpl'/>
+    <servlet path='/MySampleApplicationService' class='com.mySampleApplication.server.MySampleAppServiceImpl'/>
 
 </module>

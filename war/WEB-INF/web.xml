@@ -7,7 +7,7 @@
 
     <servlet>
         <servlet-name>com.mySampleApplication.MySampleApplication MySampleApplicationService</servlet-name>
-        <servlet-class>com.mySampleApplication.server.MySampleApplicationServiceImpl</servlet-class>
+        <servlet-class>com.mySampleApplication.server.MySampleAppServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>com.mySampleApplication.MySampleApplication MySampleApplicationService</servlet-name>
