@@ -8,6 +8,7 @@
     <property name="lib.dir"     value="lib"/>
     <property name="web.content"     value="web"/>
     <property name="main-class"  value="Main"/>
+    <property name="classes.dir" value="classes"/>
 
     <path id="classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
@@ -20,35 +21,29 @@
         <delete file="myApplication_Src.zip"/>
     </target>
 
-    <!--Эта задача создает папки для размещения скомпилированных
-    исходников и дистрибутива-->
     <target name="init" depends="clean">
         <mkdir dir="${buildSrc}"/>
         <mkdir dir="${dist}"/>
+
     </target>
 
-    <target name="compile" depends="init">
-        <javac srcdir="${src}" destdir="${buildSrc}">
-            <classpath refid="classpath"/>
-        </javac>
+    <target name="compile"  depends="init" description="Compiles the Task">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src}" destdir="${classes.dir}" classpathref="classpath"/>
     </target>
 
-    <!-- Эта задача упаковывает программу в jar-архив -->
-    <!--<target name="makeJar" depends="copy" description="Create jar-file" >-->
-        <!--<jar jarfile="${dist}/myApplication.jar" basedir="${buildSrc}"-->
-             <!--manifest="${src}/manifest.mf"/>-->
-    <!--</target>-->
-
-    <target name="makeJar" depends="compile">
-        <jar destfile="${dist}/myApplication.jar" basedir="${buildSrc}">
-            <manifest>
-                <attribute name="Main-Class" value="${main-class}"/>
-            </manifest>
+    <target name="jar" description="JARs the Task" depends="compile">
+        <jar destfile="${ant.project.name}.jar" basedir="${classes.dir}">
+        <manifest>
+            <attribute name="Main-Class" value="Main"/>
+            <attribute name = "Class-Path" value="**/*.jar"/>
+        </manifest>
+            <fileset dir="${lib.dir}" includes="**/*.jar"/>
         </jar>
     </target>
 
     <target name="run" description="Run program"><!--depends="dist" > -->
-        <java jar="${dist}/myApplication.jar" fork="true" classpathref="classpath"/>
+        <java jar="${ant.project.name}.jar" fork="true" classpathref="classpath"/>
     </target>
 
     <target name="copy" depends="compile">
