@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="GlushkovAlexeyGHS" basedir="." default="clean">
+
+    <property name="src" location="src"/>
+    <property name="buildSrc" location="myApplication"/>
+    <property name="dist"  location="dist"/>
+    <property name="jdk.version" value="1.7" />
+    <property name="lib.dir"     value="lib"/>
+    <property name="web.content"     value="web"/>
+    <property name="main-class"  value="Main"/>
+
+    <path id="classpath">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+
+    <target name="clean">
+        <delete dir="build"/>
+        <delete dir="out"/>
+        <delete dir="${dist}"/>
+        <delete file="myApplication_Src.zip"/>
+    </target>
+
+    <!--Эта задача создает папки для размещения скомпилированных
+    исходников и дистрибутива-->
+    <target name="init" depends="clean">
+        <mkdir dir="${buildSrc}"/>
+        <mkdir dir="${dist}"/>
+    </target>
+
+    <target name="compile" depends="init">
+        <javac srcdir="${src}" destdir="${buildSrc}">
+            <classpath refid="classpath"/>
+        </javac>
+    </target>
+
+    <!-- Эта задача упаковывает программу в jar-архив -->
+    <!--<target name="makeJar" depends="copy" description="Create jar-file" >-->
+        <!--<jar jarfile="${dist}/myApplication.jar" basedir="${buildSrc}"-->
+             <!--manifest="${src}/manifest.mf"/>-->
+    <!--</target>-->
+
+    <target name="makeJar" depends="compile">
+        <jar destfile="${dist}/myApplication.jar" basedir="${buildSrc}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="run" description="Run program"><!--depends="dist" > -->
+        <java jar="${dist}/myApplication.jar" fork="true" classpathref="classpath"/>
+    </target>
+
+    <target name="copy" depends="compile">
+        <copy todir="${buildSrc}/lib">
+            <fileset dir="${lib.dir}"/>
+        </copy>
+    </target>
+
+</project>
