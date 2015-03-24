@@ -11,13 +11,17 @@
     <property name="appserver.lib"   value="{env.CATALINA_HOME}"/>
 
 
-    <property name="tomcat.libs.dir" location="D:/workspace/_LIBS" />
+    <property environment="env"/>
+    <echo message="JAVA_HOME is set to = ${env.JAVA_HOME}" />
+    <echo message="JAVA_HOME is set to = ${env.CATALINA_HOME}" />
 
     <path id="catalina-ant-classpath">
-        <fileset dir="${lib.dir}">
+        <fileset dir="${env.CATALINA_HOME}\lib">
             <include name="catalina-ant.jar"/>
             <include name="tomcat-coyote.jar"/>
             <include name="tomcat-util.jar"/>
+        </fileset>
+        <fileset dir="${env.CATALINA_HOME}\bin">
             <include name="tomcat-juli.jar"/>
         </fileset>
     </path>
@@ -35,12 +39,6 @@
     <target name="compile">
         <mkdir dir="${classes.dir}"/>
         <javac srcdir="${src.dir}" destdir="${classes.dir}" classpathref="classpath"/>
-		<!--<mkdir dir="${classes.dir}/lib"/>-->
-		<!--<copy flatten="false" todir="${classes.dir}/lib" includeemptydirs="false">-->
-			<!--<fileset dir="lib">-->
-				<!--<include name="**/*.jar" />-->
-			<!--</fileset>-->
-		<!--</copy>-->
 		<copy todir="${classes.dir}" >
             <fileset dir="${src.dir}">
                 <include name="**/*.xml" />
@@ -55,12 +53,6 @@
             <classes dir="${classes.dir}"/>
             <lib dir="${lib.dir}" />
         </war>
-
-        <copy todir="C:\Apache Software Foundation\Tomcat 7.0\webapps" overwrite="true">
-            <fileset dir="${jar.dir}">
-                <include name="*.war"/>
-            </fileset>
-        </copy>
 
         <copy todir="${deploy.path}" preservelastmodified="true">
             <fileset dir=".">
@@ -78,30 +70,32 @@
     <taskdef name="catalina-stop" classname="org.apache.catalina.ant.StopTask" classpathref="catalina-ant-classpath"/>
     <taskdef name="catalina-undeploy" classname="org.apache.catalina.ant.UndeployTask" classpathref="catalina-ant-classpath"/>
 
-    <property name="tomcat.manager.url"   value="http://localhost:8080/manager/html"/>
-    <property name="tomcat.username"   value="admin"/>
-    <property name="tomcat.password"   value="admin"/>
+    <!--<property name="tomcat.manager.url"   value="http://localhost:8080/manager/html"/> http://localhost:8080/manager/text-->
+    <property name="tomcat.manager.url"   value="http://localhost:8080/manager/text"/>
 
-    <target name = "stop-webapp">
+    <property name="tomcat.username"   value="viliric"/>
+    <property name="tomcat.password"   value="1q2w3e4r"/>
+
+    <target name = "stop">
         <catalina-stop url="${tomcat.manager.url}"
                        username="${tomcat.username}"
                        password="${tomcat.password}"
-                       path="/GlushkovAlexeyGHS"
+                       path="/"
                        failonerror="false"/>
     </target>
 
-    <target name = "start-webapp">
+    <target name = "start">
         <catalina-start url="${tomcat.manager.url}"
                         username="${tomcat.username}"
                         password="${tomcat.password}"
-                        path="/${ant.project.name}"/>
+                        path="/"/>
     </target>
 
-    <target name = "undeploy-webapp">
+    <target name = "undeploy">
         <catalina-undeploy url="${tomcat.manager.url}"
                            username="${tomcat.username}"
                            password="${tomcat.password}"
-                           path="/${ant.project.name}"
+                           path="/"
                            failonerror="false"/>
     </target>
 
@@ -109,18 +103,20 @@
         <catalina-deploy url="${tomcat.manager.url}"
                          username="${tomcat.username}"
                          password="${tomcat.password}"
-                         path="/${ant.project.name}"
-                         war="file:${jar.dir}/${ant.project.name}.war"/>
+                         path="/"
+                         war="${jar.dir}/${ant.project.name}.war"
+                />
+
     </target>
 
     <target name="clean-build" depends="clean,war"/>
 
     <target name="main" depends="clean,war"/>
 
+    <target name="redeploy" depends="clean,war,stop,undeploy,deploy,start"/>
 
-    <property environment="env"/>
-    <echo message="JAVA_HOME is set to = ${env.JAVA_HOME}" />
-    <echo message="JAVA_HOME is set to = ${env.CATALINA_HOME}" />
+
+
 
 
 </project>

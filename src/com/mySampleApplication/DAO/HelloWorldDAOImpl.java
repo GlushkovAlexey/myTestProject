@@ -14,6 +14,7 @@ public class HelloWorldDAOImpl implements HelloWorldDAO {
         try {
             session = HibernateUtil.getSessionFactory().openSession();
             HelloEntity = (HellotableEntity) session.load(HellotableEntity.class, (short) id);
+            HelloEntity.getValue();
         } catch (Exception e) {
 
         } finally {
